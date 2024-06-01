@@ -38,7 +38,7 @@ const dummy: tasktype[] = [
     title: "play chess",
     desc: "tournament",
     ttime: new Date(),
-    taskstate: COLUMN.COMPLETED
+    taskstate: COLUMN.INPROGRESS
 
   }
 ]
@@ -91,19 +91,73 @@ const DropIndicator = ({ bid, column }: indicatorProps) => {
     <div
       data-before={bid || '-1'}
       data-column={column}
-      className=' my-0.5 h-[1px] bg-stone-500 flex  w-full opacity-0 '>
+      className=' my-0.5 h-[2px] bg-blue-500 flex  w-full opacity-0 '>
     </div>
   )
 }
 const Column = ({ title, column, tasks, setTasks }: cprops) => {
   const [active,setActive]=useState(false);
-  const handleDragOver=()=>{
+  const handleDragOver=(e:DragEvent)=>{
+    // prevent overload
+    e.preventDefault();
+    // set the highlighter for the closest element 
+    highlight(e);
     setActive(true);
   }
-  const handleOnDrop=()=>{
+  const highlight=(e:DragEvent)=>{
+    // get all the indicators for cards for a particular column
+    const indicators=getIndicatorsforcol();
+    clearHighlights(indicators);
+    console.log('indicators',indicators);
+    // get the closest element to the cursor grabbed element 
+    const el=getclosest(e,indicators);
+    // set the indicator of the closest element;
+    
+    el.element.style.opacity="1";
+
 
   }
+  const clearHighlights=(els?:HTMLElement[])=>{
+    const indicators=els??getIndicatorsforcol();
+    indicators.forEach((i)=>{
+      i.style.opacity='0';
+    })
+    
+  }
+  const getclosest=(e:DragEvent,ar:HTMLElement[])=>{
+    const OFFSET=50;
+    const el=ar.reduce(
+      (closest,child)=>{
+        const ofset=e.clientY-(child.getBoundingClientRect().top+OFFSET);
+        if(ofset<0 && ofset>closest.offset){
+          return {
+            offset:ofset,
+            element:child,
+          }
+        }
+          else {
+            return closest;
+          }
+
+      },
+      {
+        offset:Number.NEGATIVE_INFINITY,
+        element:ar[ar.length-1],
+      }
+    )
+    return el;
+
+  }
+
+  const getIndicatorsforcol=()=>{
+    return Array.from((document.querySelectorAll(`[data-column="${column.toString()}"]`) as unknown as HTMLElement[]))
+  }
+  const handleOnDrop=(e:DragEvent)=>{
+    e.preventDefault();
+    console.log('drop')
+  }
   const handleOnLeave=()=>{
+    clearHighlights();
     setActive(false);
   }
   // taskfilter according to the columns
