@@ -108,7 +108,7 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
     // get all the indicators for cards for a particular column
     const indicators=getIndicatorsforcol();
     clearHighlights(indicators);
-    console.log('indicators',indicators);
+    // console.log('indicators',indicators);
     // get the closest element to the cursor grabbed element 
     const el=getclosest(e,indicators);
     // set the indicator of the closest element;
@@ -152,9 +152,38 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
   const getIndicatorsforcol=()=>{
     return Array.from((document.querySelectorAll(`[data-column="${column.toString()}"]`) as unknown as HTMLElement[]))
   }
+  const handleDragStart=(e:DragEvent,tsk:tasktype)=>{
+    // e.preventDefault();
+    e.dataTransfer.setData('taskId',tsk.id);
+
+  }
   const handleOnDrop=(e:DragEvent)=>{
     e.preventDefault();
     console.log('drop')
+    const taskid=e.dataTransfer.getData('taskId');
+    setActive(false);
+    const indicators=getIndicatorsforcol();
+    clearHighlights(indicators);
+    const {element:el}=getclosest(e,indicators);
+    const before=el.dataset.before || "-1";
+    if(before!==taskid){
+      let tasksCopy:tasktype[]=[...tasks];
+      let foundTask=tasksCopy.find((task)=>task.id==taskid);
+      if(!foundTask){alert("No task found"); return ;}
+      else foundTask={...foundTask,taskstate:column}
+      tasksCopy.filter((task)=>task.id!==taskid);
+      if(before=="-1") tasksCopy.push(foundTask);
+      else {
+        console.log('before',tasksCopy)
+        let idx=tasksCopy.findIndex((task)=>task.id==before);
+        tasksCopy.splice(idx,0,foundTask);
+        console.log('after',tasksCopy)
+
+      }
+      setTasks(tasksCopy);
+    }
+
+
   }
   const handleOnLeave=()=>{
     clearHighlights();
@@ -172,7 +201,7 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
       </div>
       {/* tasks list */}
       <div
-      // onDrop={}
+      onDrop={handleOnDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleOnLeave}
        className={`h-full w-full transition-colors ${
@@ -181,7 +210,7 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
         {
           taskfilter.length > 0 && taskfilter.map((tsk) => {
             return (
-              <Card key={tsk.id} tsk={tsk} />
+              <Card key={tsk.id} tsk={tsk} start={handleDragStart} />
             )
           })
         }
@@ -195,15 +224,19 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
 }
 interface tprops {
   tsk: tasktype,
+  start:Function,
 }
 
-const Card = ({ tsk }: tprops) => {
+const Card = ({ tsk,start }: tprops) => {
+
   return (
     <>
       <DropIndicator column={tsk.taskstate} bid={tsk.id} />
       <div
-
         draggable="true"
+        onDragStart={(e)=>{
+          console.log('start')
+          start(e,tsk)}}
         className='flex w-full bg-slate-500 h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-neutral-500 border-[1px] '>
         {/* title  */}
         <span className='flex w-full text-start items-center '>Title: {tsk.title}</span>
