@@ -303,8 +303,9 @@ const Card = ({ tsk, start, tasks, setTask }: tprops) => {
         {/* timestamp */}
         {tsk.taskstate == COLUMN.COMPLETED ? (<span className=' visible hover:invisible flex w-full place-content-end'>{new Date(tsk.ttime).toLocaleString().trimEnd()}</span>) : ''}
         {tsk.taskstate == COLUMN.COMPLETED ? (<button 
+        className='flex hover:cursor-pointer p-2 text-[17px]  w-full place-content-end'><FiTrash
         onClick={()=>handleDelete(tsk)}
-        className='flex hover:cursor-pointer p-2 text-[17px]  w-full place-content-end'><FiTrash/></button>) : ''}
+        /></button>) : ''}
 
       </motion.div>
     </>
