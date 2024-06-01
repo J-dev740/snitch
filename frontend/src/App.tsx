@@ -173,15 +173,15 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
       // console.log(tasksCopy)
       let foundTask = tasksCopy.find((task) => task.id == taskid);
       if (!foundTask) { alert("No task found"); return; }
-      else if(foundTask.taskstate==COLUMN.COMPLETED) return;
+      else if(foundTask.taskstate==COLUMN.COMPLETED || (foundTask.taskstate==COLUMN.INPROGRESS && column==COLUMN.PENDING)) return;
       else foundTask = { ...foundTask, taskstate: column }
       tasksCopy = tasksCopy.filter((task) => task.id !== taskid);
       if (before == "-1") tasksCopy.push(foundTask);
       else {
-        console.log('before', tasksCopy)
+        // console.log('before', tasksCopy)
         let idx = tasksCopy.findIndex((task) => task.id == before);
         tasksCopy.splice(idx, 0, foundTask);
-        console.log('after', tasksCopy)
+        // console.log('after', tasksCopy)
 
       }
       setTasks(tasksCopy);
