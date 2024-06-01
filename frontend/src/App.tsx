@@ -1,6 +1,7 @@
-import React, { Dispatch, FormEvent, useState, DragEvent, SetStateAction } from 'react'
-// import './App.css'
-// import './index.css'
+import { Dispatch, FormEvent, useState, DragEvent, SetStateAction } from 'react'
+import { motion } from 'framer-motion'
+import { FiPlus, FiTrash } from "react-icons/fi";
+
 
 function App() {
 
@@ -96,90 +97,90 @@ const DropIndicator = ({ bid, column }: indicatorProps) => {
   )
 }
 const Column = ({ title, column, tasks, setTasks }: cprops) => {
-  const [active,setActive]=useState(false);
-  const handleDragOver=(e:DragEvent)=>{
+  const [active, setActive] = useState(false);
+  const handleDragOver = (e: DragEvent) => {
     // prevent overload
     e.preventDefault();
     // set the highlighter for the closest element 
     highlight(e);
     setActive(true);
   }
-  const highlight=(e:DragEvent)=>{
+  const highlight = (e: DragEvent) => {
     // get all the indicators for cards for a particular column
-    const indicators=getIndicatorsforcol();
+    const indicators = getIndicatorsforcol();
     clearHighlights(indicators);
     // console.log('indicators',indicators);
     // get the closest element to the cursor grabbed element 
-    const el=getclosest(e,indicators);
+    const el = getclosest(e, indicators);
     // set the indicator of the closest element;
-    
-    el.element.style.opacity="1";
+
+    el.element.style.opacity = "1";
 
 
   }
-  const clearHighlights=(els?:HTMLElement[])=>{
-    const indicators=els??getIndicatorsforcol();
-    indicators.forEach((i)=>{
-      i.style.opacity='0';
+  const clearHighlights = (els?: HTMLElement[]) => {
+    const indicators = els ?? getIndicatorsforcol();
+    indicators.forEach((i) => {
+      i.style.opacity = '0';
     })
-    
+
   }
-  const getclosest=(e:DragEvent,ar:HTMLElement[])=>{
-    const OFFSET=50;
-    const el=ar.reduce(
-      (closest,child)=>{
-        const ofset=e.clientY-(child.getBoundingClientRect().top+OFFSET);
-        if(ofset<0 && ofset>closest.offset){
+  const getclosest = (e: DragEvent, ar: HTMLElement[]) => {
+    const OFFSET = 50;
+    const el = ar.reduce(
+      (closest, child) => {
+        const ofset = e.clientY - (child.getBoundingClientRect().top + OFFSET);
+        if (ofset < 0 && ofset > closest.offset) {
           return {
-            offset:ofset,
-            element:child,
+            offset: ofset,
+            element: child,
           }
         }
-          else {
-            return closest;
-          }
+        else {
+          return closest;
+        }
 
       },
       {
-        offset:Number.NEGATIVE_INFINITY,
-        element:ar[ar.length-1],
+        offset: Number.NEGATIVE_INFINITY,
+        element: ar[ar.length - 1],
       }
     )
     return el;
 
   }
 
-  const getIndicatorsforcol=()=>{
+  const getIndicatorsforcol = () => {
     return Array.from((document.querySelectorAll(`[data-column="${column.toString()}"]`) as unknown as HTMLElement[]))
   }
-  const handleDragStart=(e:DragEvent,tsk:tasktype)=>{
+  const handleDragStart = (e: DragEvent, tsk: tasktype) => {
     // e.preventDefault();
-    e.dataTransfer.setData('taskId',tsk.id);
+    e.dataTransfer.setData('taskId', tsk.id);
 
   }
-  const handleOnDrop=(e:DragEvent)=>{
+  const handleOnDrop = (e: DragEvent) => {
     e.preventDefault();
     console.log('drop')
-    const taskid=e.dataTransfer.getData('taskId');
+    const taskid = e.dataTransfer.getData('taskId');
     setActive(false);
-    const indicators=getIndicatorsforcol();
+    const indicators = getIndicatorsforcol();
     clearHighlights(indicators);
-    const {element}=getclosest(e,indicators);
-    const before=element.dataset.before || "-1";
-    console.log(before,taskid)
-    if(before!==taskid){
-      let tasksCopy:tasktype[]=[...tasks];
+    const { element } = getclosest(e, indicators);
+    const before = element.dataset.before || "-1";
+    console.log(before, taskid)
+    if (before !== taskid) {
+      let tasksCopy: tasktype[] = [...tasks];
       console.log(tasksCopy)
-      let foundTask=tasksCopy.find((task)=>task.id==taskid);
-      if(!foundTask){alert("No task found"); return ;}
-      else foundTask={...foundTask,taskstate:column}
-      tasksCopy=tasksCopy.filter((task)=>task.id!==taskid);
-      if(before=="-1") tasksCopy.push(foundTask);
+      let foundTask = tasksCopy.find((task) => task.id == taskid);
+      if (!foundTask) { alert("No task found"); return; }
+      else foundTask = { ...foundTask, taskstate: column }
+      tasksCopy = tasksCopy.filter((task) => task.id !== taskid);
+      if (before == "-1") tasksCopy.push(foundTask);
       else {
-        console.log('before',tasksCopy)
-        let idx=tasksCopy.findIndex((task)=>task.id==before);
-        tasksCopy.splice(idx,0,foundTask);
-        console.log('after',tasksCopy)
+        console.log('before', tasksCopy)
+        let idx = tasksCopy.findIndex((task) => task.id == before);
+        tasksCopy.splice(idx, 0, foundTask);
+        console.log('after', tasksCopy)
 
       }
       setTasks(tasksCopy);
@@ -187,28 +188,33 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
 
 
   }
-  const handleOnLeave=()=>{
+  const handleOnLeave = () => {
     clearHighlights();
     setActive(false);
   }
+  const [adding, setAdding] = useState(false);
   // taskfilter according to the columns
   const taskfilter: tasktype[] = tasks.filter((t) => t.taskstate == column);
   return (
     // list column
-    <div className='flex flex-col justify-start gap-2 items-center h-screen  bg-slate-400/25 w-72 shrink-0'>
+    <div className='flex flex-col  gap-1  items-center h-screen  bg-slate-400/25 w-72 shrink-0'>
       {/* list header */}
-      <div className='flex flex-row w-full h-fit  justify-center items-center mb-4 text-gray-700 bg-slate-400'>
-        <h3 className={` font-medium`}>{title}</h3>
-        <span className='font-bold tracking-wide leading-normal ml-2'>{taskfilter.length}</span>
+      <div className='flex flex-row w-full h-fit justify-between  p-2 items-center mb-4 text-gray-700 bg-slate-400'>
+        <div className='flex flex-row justify-center  items-center gap-2'>
+          <h3 className={`flex w-fit shrink-0 font-medium`}>{title}</h3>
+          <span className='flex font-bold tracking-wide leading-normal ml-2'>{taskfilter.length}</span>
+        </div>
+        <button
+          onClick={() => setAdding(true)}
+          className='flex w-fit  p-1 ml-2 mr-1 hover:cursor-pointer'> <FiPlus /></button>
       </div>
       {/* tasks list */}
       <div
-      onDrop={handleOnDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleOnLeave}
-       className={`h-full w-full transition-colors ${
-          active ? "bg-neutral-800/50" : "bg-neutral-800/0"
-        }`}>
+        onDrop={handleOnDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleOnLeave}
+        className={`h-full w-full transition-colors ${active ? "bg-neutral-800/50" : "bg-neutral-800/0"
+          }`}>
         {
           taskfilter.length > 0 && taskfilter.map((tsk) => {
             return (
@@ -217,6 +223,7 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
           })
         }
         <DropIndicator column={column} bid={null} />
+        <Add adding={adding} column={column} setadding={setAdding} settasks={setTasks} />
 
       </div>
 
@@ -226,19 +233,22 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
 }
 interface tprops {
   tsk: tasktype,
-  start:Function,
+  start: Function,
 }
 
-const Card = ({ tsk,start }: tprops) => {
+const Card = ({ tsk, start }: tprops) => {
 
   return (
     <>
       <DropIndicator column={tsk.taskstate} bid={tsk.id} />
-      <div
+      <motion.div
+        layout
+        layoutId={tsk.id}
         draggable="true"
-        onDragStart={(e)=>{
+        onDragStart={(e) => {
           console.log('start')
-          start(e,tsk)}}
+          start(e, tsk)
+        }}
         className='flex w-full bg-slate-500 h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-neutral-500 border-[1px] '>
         {/* title  */}
         <span className='flex w-full text-start items-center '>Title: {tsk.title}</span>
@@ -248,8 +258,79 @@ const Card = ({ tsk,start }: tprops) => {
         </div>) : '') : ''}
         {/* timestamp */}
         {tsk.taskstate == COLUMN.COMPLETED ? (<span className='flex w-full place-content-end'>{tsk.ttime.toDateString()}</span>) : ''}
-      </div>
+      </motion.div>
     </>
+  )
+}
+
+interface addprops {
+  adding: boolean
+  column: COLUMN
+  settasks: Dispatch<SetStateAction<tasktype[]>>
+  setadding: Dispatch<SetStateAction<boolean>>
+}
+const Add = ({ setadding, adding, column, settasks }: addprops) => {
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!title.trim().length) return;
+    const newtask: tasktype = {
+      taskstate: column,
+      title: title,
+      desc: desc ?? '',
+      id: Math.random().toString(),
+      ttime: new Date(Date.now())
+    }
+    settasks((prev) => [...prev, newtask]);
+    setTitle('');
+    setDesc('');
+    setadding(false);
+  }
+  return (
+    <div className='flex w-full'>
+      {
+        adding ? (
+          <motion.form
+            onSubmit={(e) => handleSubmit(e)}
+            layout
+            className='flex w-full flex-col'
+          >
+            <input
+              type="text"
+              value={title}
+              required={true}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Title"
+              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-neutral-50 placeholder-black focus:outline-0"
+            />
+            <textarea
+              onChange={(e) => setDesc(e.target.value)}
+              required={false}
+              autoFocus
+              placeholder="Add new task..."
+              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-neutral-50 placeholder-black focus:outline-0"
+            />
+            <div className="mt-1.5 flex items-center justify-end gap-1.5">
+              <button
+                onClick={() => { setTitle(''); setDesc(''); setadding(false) }}
+                className="px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-50"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 rounded bg-neutral-50 px-3 py-1.5 text-xs text-neutral-950 transition-colors hover:bg-neutral-300"
+              >
+                <span>Add</span>
+                <FiPlus />
+              </button>
+            </div>
+          </motion.form>
+        ) : (<></>)
+      }
+
+    </div>
   )
 }
 
