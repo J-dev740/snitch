@@ -1,4 +1,4 @@
-import React,{Dispatch,FormEvent,useState,DragEvent,SetStateAction} from 'react'
+import React, { Dispatch, FormEvent, useState, DragEvent, SetStateAction } from 'react'
 // import './App.css'
 // import './index.css'
 
@@ -6,85 +6,108 @@ function App() {
 
   return (
     <div className='flex items-center justify-center  w-full ring-2 h-screen bg-slate-300 text-black'>
-        <Taskboard/>
+      <Taskboard />
     </div>
   )
 }
 
 export default App
 enum COLUMN {
-  PENDING="pending",
-  INPROGRESS="inprogress",
-  COMPLETED="completed"
+  PENDING = "pending",
+  INPROGRESS = "inprogress",
+  COMPLETED = "completed"
 }
-const dummy:tasktype[]=[
+const dummy: tasktype[] = [
   {
-    id:Math.random().toString(),
-    title:"go gym",
-    desc:"go to the gym",
-    ttime:new Date(),
-    taskstate:COLUMN.PENDING
+    id: Math.random().toString(),
+    title: "go gym",
+    desc: "go to the gym",
+    ttime: new Date(),
+    taskstate: COLUMN.PENDING
   },
   {
-    id:Math.random().toString(),
-    title:"go football",
-    desc:"play the match",
-    ttime:new Date(),
-    taskstate:COLUMN.INPROGRESS
+    id: Math.random().toString(),
+    title: "go football",
+    desc: "play the match",
+    ttime: new Date(),
+    taskstate: COLUMN.INPROGRESS
 
   },
   {
-    id:Math.random().toString(),
-    title:"play chess",
-    desc:"tournament",
-    ttime:new Date(),
-    taskstate:COLUMN.PENDING
+    id: Math.random().toString(),
+    title: "play chess",
+    desc: "tournament",
+    ttime: new Date(),
+    taskstate: COLUMN.COMPLETED
 
   }
 ]
-const Taskboard=()=>{
-  const [task,setTasks]=useState(dummy);
+const Taskboard = () => {
+  const [task, setTasks] = useState(dummy);
   return (
     <div className='flex item-center justify-center  w-full h-full bg-slate-300 p-8 gap-3  overflow-scroll  '>
-     <Column
-     title={"TO DO"}
-     column={COLUMN.PENDING}
-     tasks={task}
-     setTasks={setTasks}
-     />
-     <Column
-     title={"IN PROGRESS"}
-     column={COLUMN.INPROGRESS}
-     tasks={task}
-     setTasks={setTasks}
-     />
-     <Column
-     title={"DONE"}
-     column={COLUMN.COMPLETED}
-     tasks={task}
-     setTasks={setTasks}
-     />
+      <Column
+        title={"TO DO"}
+        column={COLUMN.PENDING}
+        tasks={task}
+        setTasks={setTasks}
+      />
+      <Column
+        title={"IN PROGRESS"}
+        column={COLUMN.INPROGRESS}
+        tasks={task}
+        setTasks={setTasks}
+      />
+      <Column
+        title={"DONE"}
+        column={COLUMN.COMPLETED}
+        tasks={task}
+        setTasks={setTasks}
+      />
     </div>
   )
 }
 
-interface tasktype{
-  id:string,
-  title:String,
-  desc?:String,
-  ttime:Date,
-  taskstate:COLUMN
+interface tasktype {
+  id: string,
+  title: String,
+  desc?: String,
+  ttime: Date,
+  taskstate: COLUMN
 }
-interface  cprops{
-title:String,
-column:COLUMN,
-tasks:tasktype[],
-setTasks:Dispatch<SetStateAction<tasktype[]>>
+interface cprops {
+  title: String,
+  column: COLUMN,
+  tasks: tasktype[],
+  setTasks: Dispatch<SetStateAction<tasktype[]>>
 
 }
-const Column=({title,column,tasks,setTasks}:cprops)=>{
+interface indicatorProps {
+  bid: string | null,
+  column: COLUMN
+}
+const DropIndicator = ({ bid, column }: indicatorProps) => {
+  return (
+    <div
+      data-before={bid || '-1'}
+      data-column={column}
+      className=' my-0.5 h-[1px] bg-stone-500 flex  w-full opacity-0 '>
+    </div>
+  )
+}
+const Column = ({ title, column, tasks, setTasks }: cprops) => {
+  const [active,setActive]=useState(false);
+  const handleDragOver=()=>{
+    setActive(true);
+  }
+  const handleOnDrop=()=>{
+
+  }
+  const handleOnLeave=()=>{
+    setActive(false);
+  }
   // taskfilter according to the columns
-  const taskfilter:tasktype[]=tasks.filter((t)=>t.taskstate==column);
+  const taskfilter: tasktype[] = tasks.filter((t) => t.taskstate == column);
   return (
     // list column
     <div className='flex flex-col justify-start gap-2 items-center h-screen  bg-slate-400/25 w-72 shrink-0'>
@@ -94,38 +117,50 @@ const Column=({title,column,tasks,setTasks}:cprops)=>{
         <span className='font-bold tracking-wide leading-normal ml-2'>{taskfilter.length}</span>
       </div>
       {/* tasks list */}
-      <div className={`flex flex-col gap-1 w-full h-fit`}>
-      {
-       taskfilter.length>0 && taskfilter.map((tsk)=>{
-          return (
-            <Card key={tsk.id} tsk={tsk}/>
-          )
-        })
-      }
+      <div
+      // onDrop={}
+      onDragOver={handleDragOver}
+      onDragLeave={handleOnLeave}
+       className={`h-full w-full transition-colors ${
+          active ? "bg-neutral-800/50" : "bg-neutral-800/0"
+        }`}>
+        {
+          taskfilter.length > 0 && taskfilter.map((tsk) => {
+            return (
+              <Card key={tsk.id} tsk={tsk} />
+            )
+          })
+        }
+        <DropIndicator column={column} bid={null} />
+
       </div>
 
     </div>
   )
 
 }
-interface tprops{
-  tsk:tasktype,
+interface tprops {
+  tsk: tasktype,
 }
 
-const Card=({tsk}:tprops)=>{
+const Card = ({ tsk }: tprops) => {
   return (
-    <div
+    <>
+      <DropIndicator column={tsk.taskstate} bid={tsk.id} />
+      <div
 
-    draggable="true"
-    className='flex w-full bg-slate-500 h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-neutral-500 border-[1px] '>
-      {/* title  */}
-      <span className='flex w-full text-start items-center '>Title: {tsk.title}</span>
-      {/* description */}
-      {tsk.desc?(tsk.desc.length>0?(<div className=' flex w-full font-normal text-wrap text-left'>
-        {tsk.desc}
-      </div>):''):''}
-      {/* timestamp */}
-      {tsk.taskstate==COLUMN.COMPLETED?(<span className='flex w-full place-content-end'>{tsk.ttime.getDate()}</span>):''}
-    </div>
+        draggable="true"
+        className='flex w-full bg-slate-500 h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-neutral-500 border-[1px] '>
+        {/* title  */}
+        <span className='flex w-full text-start items-center '>Title: {tsk.title}</span>
+        {/* description */}
+        {tsk.desc ? (tsk.desc.length > 0 ? (<div className=' flex w-full font-normal text-wrap text-left'>
+          {tsk.desc}
+        </div>) : '') : ''}
+        {/* timestamp */}
+        {tsk.taskstate == COLUMN.COMPLETED ? (<span className='flex w-full place-content-end'>{tsk.ttime.toDateString()}</span>) : ''}
+      </div>
+    </>
   )
 }
+
