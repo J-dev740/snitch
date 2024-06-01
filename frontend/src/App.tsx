@@ -1,6 +1,6 @@
 import { Dispatch, FormEvent, useState, DragEvent, SetStateAction } from 'react'
 import { motion } from 'framer-motion'
-import { FiPlus, } from "react-icons/fi";
+import { FiPlus, FiTrash, } from "react-icons/fi";
 
 
 enum COLUMN {
@@ -249,6 +249,12 @@ const Card = ({ tsk, start, tasks, setTask }: tprops) => {
     cpy.push(updatedtask);
     setTask(cpy);
   }
+  
+  const handleDelete=(tsk:tasktype)=>{
+    let cpy=[...tasks];
+    cpy=cpy.filter((task)=>task.id!==tsk.id);
+    setTask(cpy);
+  }
 
   return (
     <>
@@ -277,7 +283,11 @@ const Card = ({ tsk, start, tasks, setTask }: tprops) => {
           <Check />
         </div>)}
         {/* timestamp */}
-        {tsk.taskstate == COLUMN.COMPLETED ? (<span className='flex w-full place-content-end'>{new Date(tsk.ttime).toLocaleString().trimEnd()}</span>) : ''}
+        {tsk.taskstate == COLUMN.COMPLETED ? (<span className=' visible hover:invisible flex w-full place-content-end'>{new Date(tsk.ttime).toLocaleString().trimEnd()}</span>) : ''}
+        {tsk.taskstate == COLUMN.COMPLETED ? (<button 
+        onClick={()=>handleDelete(tsk)}
+        className='flex hover:cursor-pointer p-2 text-[17px]  w-full place-content-end'><FiTrash/></button>) : ''}
+
       </motion.div>
     </>
   )
