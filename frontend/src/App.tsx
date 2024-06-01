@@ -283,7 +283,7 @@ const Card = ({ tsk, start,tasks,setTask }: tprops) => {
         <Check/>
         </div>)}
         {/* timestamp */}
-        {tsk.taskstate == COLUMN.COMPLETED ? (<span className='flex w-full place-content-end'>{tsk.ttime.toDateString()}</span>) : ''}
+        {tsk.taskstate == COLUMN.COMPLETED ? (<span className='flex w-full place-content-end'>{new Date(tsk.ttime).toLocaleString().trimEnd()}</span>) : ''}
       </motion.div>
     </>
   )
