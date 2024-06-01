@@ -1,6 +1,6 @@
 import { Dispatch, FormEvent, useState, DragEvent, SetStateAction } from 'react'
 import { motion } from 'framer-motion'
-import { FiPlus, FiTrash } from "react-icons/fi";
+import { FiPlus, } from "react-icons/fi";
 
 enum COLUMN {
   PENDING = "pending",
@@ -285,7 +285,7 @@ const Card = ({ tsk, start, tasks, setTask }: tprops) => {
 
 
 // this component lets you add a new task to the list 
-const Add = ({ column, settasks }: addprops) => {
+const Add = ({  settasks }: addprops) => {
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
