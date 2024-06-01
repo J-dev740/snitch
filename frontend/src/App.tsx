@@ -164,14 +164,16 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
     setActive(false);
     const indicators=getIndicatorsforcol();
     clearHighlights(indicators);
-    const {element:el}=getclosest(e,indicators);
-    const before=el.dataset.before || "-1";
+    const {element}=getclosest(e,indicators);
+    const before=element.dataset.before || "-1";
+    console.log(before,taskid)
     if(before!==taskid){
       let tasksCopy:tasktype[]=[...tasks];
+      console.log(tasksCopy)
       let foundTask=tasksCopy.find((task)=>task.id==taskid);
       if(!foundTask){alert("No task found"); return ;}
       else foundTask={...foundTask,taskstate:column}
-      tasksCopy.filter((task)=>task.id!==taskid);
+      tasksCopy=tasksCopy.filter((task)=>task.id!==taskid);
       if(before=="-1") tasksCopy.push(foundTask);
       else {
         console.log('before',tasksCopy)
