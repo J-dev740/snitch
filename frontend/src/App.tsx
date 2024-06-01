@@ -6,7 +6,7 @@ import { FiPlus, FiTrash } from "react-icons/fi";
 function App() {
 
   return (
-    <div className='flex items-center justify-center  w-full ring-2 h-screen bg-slate-300 text-black'>
+    <div className='flex items-center justify-center  w-full  h-screen bg-white text-black'>
       <Taskboard />
     </div>
   )
@@ -46,7 +46,7 @@ const dummy: tasktype[] = [
 const Taskboard = () => {
   const [task, setTasks] = useState(dummy);
   return (
-    <div className='flex item-center justify-center  w-full h-full bg-slate-300 p-8 gap-3  overflow-scroll  '>
+    <div className='flex item-center justify-center  w-full md:min-h-[500px] lg:min-h-[700px] h-full bg-white p-8 gap-3  overflow-scroll  '>
       <Column
         title={"TO DO"}
         column={COLUMN.PENDING}
@@ -171,11 +171,15 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
     if (before !== taskid) {
       let tasksCopy: tasktype[] = [...tasks];
       // console.log(tasksCopy)
+
       let foundTask = tasksCopy.find((task) => task.id == taskid);
       if (!foundTask) { alert("No task found"); return; }
       else if(foundTask.taskstate==COLUMN.COMPLETED || (foundTask.taskstate==COLUMN.INPROGRESS && column==COLUMN.PENDING)) return;
       else foundTask = { ...foundTask, taskstate: column }
       tasksCopy = tasksCopy.filter((task) => task.id !== taskid);
+      if(foundTask.taskstate==COLUMN.COMPLETED) foundTask.ttime=new Date(Date.now());
+
+      // code to update the list of tasks with the updated task states;
       if (before == "-1") tasksCopy.push(foundTask);
       else {
         // console.log('before', tasksCopy)
@@ -193,28 +197,24 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
     clearHighlights();
     setActive(false);
   }
-  const [adding, setAdding] = useState(false);
   // taskfilter according to the columns
   const taskfilter: tasktype[] = tasks.filter((t) => t.taskstate == column);
   return (
     // list column
-    <div className='flex flex-col  gap-1  items-center h-screen  bg-slate-400/25 w-72 shrink-0'>
+    <div className='flex flex-col  gap-1  items-center h-full py-2 md:min-h-[500px] min-h-[200px]  bg-stone-200 p-[3px] shadodw drop-shadow-lg hover:shadow-xl md:w-72 w-56 lg:w-80 xl:w-[400px] shrink-0'>
       {/* list header */}
-      <div className='flex flex-row w-full h-fit justify-between  p-2 items-center mb-4 text-gray-700 bg-slate-400'>
+      <div className='flex flex-row w-full h-fit justify-between  p-2 items-center mb-4 bg-stone-300 text-stone-600'>
         <div className='flex flex-row justify-center  items-center gap-2'>
           <h3 className={`flex w-fit shrink-0 font-medium`}>{title}</h3>
-          <span className='flex font-bold tracking-wide leading-normal ml-2'>{taskfilter.length}</span>
+          <span className='flex font-semibold tracking-wide leading-normal ml-2'>{taskfilter.length}{' '}{' '}{taskfilter.length>1?'ISSUES':'ISSUE'}</span>
         </div>
-        <button
-          onClick={() => setAdding(true)}
-          className='flex w-fit  p-1 ml-2 mr-1 hover:cursor-pointer'> <FiPlus /></button>
       </div>
       {/* tasks list */}
       <div
         onDrop={handleOnDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleOnLeave}
-        className={`h-full w-full transition-colors ${active ? "bg-neutral-800/50" : "bg-neutral-800/0"
+        className={`h-full w-full transition-colors  ${active ? "bg-neutral-800/50" : "bg-neutral-800/0"
           }`}>
         {
           taskfilter.length > 0 && taskfilter.map((tsk) => {
@@ -224,7 +224,7 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
           })
         }
         <DropIndicator column={column} bid={null} />
-        <Add adding={adding} column={column} setadding={setAdding} settasks={setTasks} />
+        {column==COLUMN.PENDING && <Add  column={column} settasks={setTasks} />}
 
       </div>
 
@@ -250,6 +250,7 @@ const Card = ({ tsk, start,tasks,setTask }: tprops) => {
     if(state==COLUMN.PENDING) state=COLUMN.INPROGRESS;
     else state=COLUMN.COMPLETED;
     const updatedtask:tasktype={...tsk,taskstate:state};
+    if(updatedtask.taskstate==COLUMN.COMPLETED) updatedtask.ttime=new Date(Date.now());
     cpy.push(updatedtask);
     setTask(cpy);
   }
@@ -265,11 +266,11 @@ const Card = ({ tsk, start,tasks,setTask }: tprops) => {
           console.log('start')
           start(e, tsk)
         }}
-        className='flex w-full bg-slate-500 h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-neutral-500 border-[1px] '>
+        className='flex w-full bg-white shadow-md hover:shadow-xl     h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-stone-300 border-[1px] '>
         {/* title  */}
-        <span className='flex w-full text-start items-center '>Title: {tsk.title}</span>
+        <span className='flex w-full text-start font-semibold text-wrap items-center '> {tsk.title}</span>
         {/* description */}
-        {tsk.desc ? (tsk.desc.length > 0 ? (<div className=' flex w-full font-normal text-wrap text-left'>
+        {tsk.desc ? (tsk.desc.length > 0 ? (<div className=' flex w-full  font-normal text-wrap text-left'>
           {tsk.desc}
         </div>) : '') : ''}
       { tsk.taskstate!==COLUMN.COMPLETED && ( <div 
@@ -289,19 +290,20 @@ const Card = ({ tsk, start,tasks,setTask }: tprops) => {
 }
 
 interface addprops {
-  adding: boolean
+  // adding: boolean
   column: COLUMN
   settasks: Dispatch<SetStateAction<tasktype[]>>
-  setadding: Dispatch<SetStateAction<boolean>>
+  // setadding: Dispatch<SetStateAction<boolean>>
 }
-const Add = ({ setadding, adding, column, settasks }: addprops) => {
+const Add = ({  column, settasks }: addprops) => {
+  const [adding,setAdding]=useState(false);
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim().length) return;
     const newtask: tasktype = {
-      taskstate: column,
+      taskstate: COLUMN.PENDING,
       title: title,
       desc: desc ?? '',
       id: Math.random().toString(),
@@ -310,7 +312,7 @@ const Add = ({ setadding, adding, column, settasks }: addprops) => {
     settasks((prev) => [...prev, newtask]);
     setTitle('');
     setDesc('');
-    setadding(false);
+    setAdding(false);
   }
   return (
     <div className='flex w-full'>
@@ -338,8 +340,8 @@ const Add = ({ setadding, adding, column, settasks }: addprops) => {
             />
             <div className="mt-1.5 flex items-center justify-end gap-1.5">
               <button
-                onClick={() => { setTitle(''); setDesc(''); setadding(false) }}
-                className="px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-50"
+                onClick={() => { setTitle(''); setDesc(''); setAdding(false) }}
+                className="px-3 py-1.5 text-xs text-stone-700 transition-colors hover:text-neutral-50"
               >
                 Close
               </button>
@@ -352,7 +354,14 @@ const Add = ({ setadding, adding, column, settasks }: addprops) => {
               </button>
             </div>
           </motion.form>
-        ) : (<></>)
+        ) : (<motion.button
+          layout
+          onClick={() => setAdding(true)}
+          className="flex w-full items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-50"
+        >
+          <FiPlus className='text-black' />
+          <span className='text-black font-semibold tracking-widest'>Create Issue</span>
+        </motion.button>)
       }
 
     </div>
@@ -368,11 +377,11 @@ const Check = () => {
 
   return (
       <div 
-          className={`flex items-center p-1 md:p-2 rounded-lg cursor-pointer transition-colors duration-300 shadow-lg ${isChecked ? 'bg-green-500 text-white' : 'bg-gray-100'}`} 
+          className={`flex items-center p-1 rounded-lg cursor-pointer transition-colors duration-300 shadow-lg ${isChecked ? 'bg-blue-500 text-white' : 'bg-gray-100'}`} 
           onClick={handleToggle}
       >
           <div 
-              className={`w-3 h-3 md:w-6 md:h-6 flex items-center justify-center border-2 rounded-md transition-colors duration-300 ${isChecked ? 'bg-white border-white' : 'bg-white border-green-500'}`}
+              className={`w-3 h-3 md:w-6 md:h-6 flex items-center justify-center border-2 rounded-md transition-colors duration-300 ${isChecked ? 'bg-white border-white' : 'bg-white border-blue-500'}`}
           >
               {isChecked && <span className="text-green-500">&#10003;</span>}
           </div>
@@ -382,7 +391,4 @@ const Check = () => {
       </div>
   );
 };
-function delay(arg0: number) {
-  throw new Error('Function not implemented.');
-}
 
