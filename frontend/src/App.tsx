@@ -1,4 +1,4 @@
-import { Dispatch, FormEvent, useState, DragEvent, SetStateAction } from 'react'
+import { Dispatch, FormEvent, useState, DragEvent, SetStateAction, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiPlus, FiTrash, } from "react-icons/fi";
 
@@ -62,6 +62,19 @@ export default App
 // this is the taskboard component enclosing the whole dynamic todo list board 
 const Taskboard = () => {
   const [task, setTasks] = useState<tasktype[]>([]);
+  const [haschecked,setHaschecked]=useState(false);
+
+  // for storage persistance we are storing it in the session storage of the browser 
+  useEffect(()=>{
+    haschecked && localStorage.setItem('tasks',JSON.stringify(task))
+  },[task])
+
+  // empty dependency array shows that the data persists during each reloads 
+  useEffect(()=>{
+    const tasks=localStorage.getItem('tasks');
+    setTasks(tasks?JSON.parse(tasks):[]);
+    setHaschecked(true);
+  },[])
   return (
     <div className='flex item-center justify-center  w-full md:min-h-[500px] lg:min-h-[700px] h-full bg-white p-8 gap-3  overflow-scroll  '>
       <Column
@@ -168,16 +181,21 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
     clearHighlights(indicators);
     const { element } = getclosest(e, indicators);
     const before = element.dataset.before || "-1";
-    console.log(before, taskid)
+
+
     if (before !== taskid) {
       let tasksCopy: tasktype[] = [...tasks];
       // console.log(tasksCopy)
 
       let foundTask = tasksCopy.find((task) => task.id == taskid);
+
+
       if (!foundTask) { alert("No task found"); return; }
       else if (foundTask.taskstate == COLUMN.COMPLETED || (foundTask.taskstate == COLUMN.INPROGRESS && column == COLUMN.PENDING)) return;
       else foundTask = { ...foundTask, taskstate: column }
       tasksCopy = tasksCopy.filter((task) => task.id !== taskid);
+
+      
       if (foundTask.taskstate == COLUMN.COMPLETED) foundTask.ttime = new Date(Date.now());
 
       // code to update the list of tasks with the updated task states;
