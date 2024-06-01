@@ -170,9 +170,10 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
     console.log(before, taskid)
     if (before !== taskid) {
       let tasksCopy: tasktype[] = [...tasks];
-      console.log(tasksCopy)
+      // console.log(tasksCopy)
       let foundTask = tasksCopy.find((task) => task.id == taskid);
       if (!foundTask) { alert("No task found"); return; }
+      else if(foundTask.taskstate==COLUMN.COMPLETED) return;
       else foundTask = { ...foundTask, taskstate: column }
       tasksCopy = tasksCopy.filter((task) => task.id !== taskid);
       if (before == "-1") tasksCopy.push(foundTask);
@@ -218,7 +219,7 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
         {
           taskfilter.length > 0 && taskfilter.map((tsk) => {
             return (
-              <Card key={tsk.id} tsk={tsk} start={handleDragStart} />
+              <Card key={tsk.id} tsk={tsk} tasks={tasks} setTask={setTasks} start={handleDragStart} />
             )
           })
         }
@@ -232,11 +233,26 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
 
 }
 interface tprops {
+  tasks:tasktype[],
   tsk: tasktype,
   start: Function,
+  setTask:Dispatch<SetStateAction<tasktype[]>>
 }
 
-const Card = ({ tsk, start }: tprops) => {
+
+const Card = ({ tsk, start,tasks,setTask }: tprops) => {
+
+  const handleCheck=(tsk:tasktype)=>{
+    const id=tsk.id;
+    let cpy=[...tasks];
+    cpy=cpy.filter((task)=>task.id!==id);
+    let state=tsk.taskstate;
+    if(state==COLUMN.PENDING) state=COLUMN.INPROGRESS;
+    else state=COLUMN.COMPLETED;
+    const updatedtask:tasktype={...tsk,taskstate:state};
+    cpy.push(updatedtask);
+    setTask(cpy);
+  }
 
   return (
     <>
@@ -256,6 +272,15 @@ const Card = ({ tsk, start }: tprops) => {
         {tsk.desc ? (tsk.desc.length > 0 ? (<div className=' flex w-full font-normal text-wrap text-left'>
           {tsk.desc}
         </div>) : '') : ''}
+      { tsk.taskstate!==COLUMN.COMPLETED && ( <div 
+        onClick={()=>
+          {
+            setTimeout(()=>handleCheck(tsk),300);
+          }
+        }
+        className='flex w-full justify-end'>
+        <Check/>
+        </div>)}
         {/* timestamp */}
         {tsk.taskstate == COLUMN.COMPLETED ? (<span className='flex w-full place-content-end'>{tsk.ttime.toDateString()}</span>) : ''}
       </motion.div>
@@ -332,5 +357,32 @@ const Add = ({ setadding, adding, column, settasks }: addprops) => {
 
     </div>
   )
+}
+
+const Check = () => {
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleToggle = () => {
+      setIsChecked(!isChecked);
+  };
+
+  return (
+      <div 
+          className={`flex items-center p-1 md:p-2 rounded-lg cursor-pointer transition-colors duration-300 shadow-lg ${isChecked ? 'bg-green-500 text-white' : 'bg-gray-100'}`} 
+          onClick={handleToggle}
+      >
+          <div 
+              className={`w-3 h-3 md:w-6 md:h-6 flex items-center justify-center border-2 rounded-md transition-colors duration-300 ${isChecked ? 'bg-white border-white' : 'bg-white border-green-500'}`}
+          >
+              {isChecked && <span className="text-green-500">&#10003;</span>}
+          </div>
+          {/* <span className="ml-2 md:ml-4 font-medium">
+              {isChecked ? 'Completed' : 'Mark as Completed'}
+          </span> */}
+      </div>
+  );
+};
+function delay(arg0: number) {
+  throw new Error('Function not implemented.');
 }
 
