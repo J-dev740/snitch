@@ -348,14 +348,14 @@ const Add = ({  settasks }: addprops) => {
               required={true}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Title"
-              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-neutral-50 placeholder-black focus:outline-0"
+              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-black placeholder-black focus:outline-0"
             />
             <textarea
               onChange={(e) => setDesc(e.target.value)}
               required={false}
               autoFocus
               placeholder="Add new task..."
-              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-neutral-50 placeholder-black focus:outline-0"
+              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-black placeholder-black focus:outline-0"
             />
             <div className="mt-1.5 flex items-center justify-end gap-1.5">
               <button
