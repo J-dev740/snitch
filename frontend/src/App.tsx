@@ -1,35 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React,{Dispatch,FormEvent,useState,DragEvent,SetStateAction} from 'react'
+// import './App.css'
+// import './index.css'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className='flex  w-full ring-2 h-screen bg-slate-300 text-black'>
+        <Taskboard/>
+    </div>
   )
 }
 
 export default App
+enum COLUMN {
+  PENDING="pending",
+  INPROGRESS="inprogress",
+  COMPLETED="completed"
+}
+const dummy:tasktype[]=[
+  {
+    title:"go gym",
+    desc:"go to the gym",
+    ttime:new Date(),
+    taskstate:COLUMN.PENDING
+  },
+  {
+    title:"go football",
+    desc:"play the match",
+    ttime:new Date(),
+    taskstate:COLUMN.PENDING
+
+  }
+]
+const Taskboard=()=>{
+  const [task,setTasks]=useState(dummy);
+  return (
+    <div className='flex w-full h-full bg-slate-300 p-8 gap-3  overflow-scroll  '>
+     <Column
+     title={"TO DO"}
+     column={COLUMN.PENDING}
+     tasks={task}
+     setTasks={setTasks}
+     />
+     <Column
+     title={"IN PROGRESS"}
+     column={COLUMN.INPROGRESS}
+     tasks={task}
+     setTasks={setTasks}
+     />
+     <Column
+     title={"DONE"}
+     column={COLUMN.COMPLETED}
+     tasks={task}
+     setTasks={setTasks}
+     />
+    </div>
+  )
+}
+
+interface tasktype{
+  title:String,
+  desc?:String,
+  ttime:Date,
+  taskstate:COLUMN
+}
+interface  cprops{
+title:String,
+column:COLUMN,
+tasks:tasktype[],
+setTasks:Dispatch<SetStateAction<tasktype[]>>
+
+}
+const Column=({title,column,tasks,setTasks}:cprops)=>{
+  // 
+  return (
+    // list column
+    <div className='h-screen  bg-slate-400/25 w-56 shrink-0'>
+      {/* list header */}
+      <div className='flex flex-row  justify-center items-center mb-4 text-gray-700 bg-slate-400'>
+        <h3 className={` font-medium`}>{title}</h3>
+      </div>
+      {/* tasks list */}
+    </div>
+  )
+
+}
