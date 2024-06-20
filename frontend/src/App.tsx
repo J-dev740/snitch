@@ -76,7 +76,9 @@ const Taskboard = () => {
     setHaschecked(true);
   },[])
   return (
-    <div className='flex item-center justify-center  w-full md:min-h-[500px] lg:min-h-[700px] h-full bg-white p-8 gap-3  overflow-scroll  '>
+    <div 
+    style={{ backgroundImage: `url(/bg.jpg)` }}
+    className='flex item-center justify-center bg-center bg-cover   w-full md:min-h-[500px] lg:min-h-[700px] h-full  p-8 gap-3  overflow-scroll  '>
       <Column
         title={"TO DO"}
         column={COLUMN.PENDING}
@@ -220,9 +222,9 @@ const Column = ({ title, column, tasks, setTasks }: cprops) => {
   const taskfilter: tasktype[] = tasks.filter((t) => t.taskstate == column);
   return (
     // list column
-    <div className='flex flex-col  gap-1  items-center h-full py-2 md:min-h-[500px] min-h-[200px]  bg-stone-200 p-[3px] shadodw drop-shadow-lg hover:shadow-xl md:w-72 w-56 lg:w-80 xl:w-[400px] shrink-0'>
+    <div className='flex flex-col  gap-1 rounded-[10px] items-center h-full py-2 md:min-h-[500px] min-h-[200px]  bg-opacity-45  bg-black backdrop-blur-sm p-[3px] shadodw drop-shadow-lg hover:shadow-xl md:w-72 w-56 lg:w-80 xl:w-[400px] shrink-0'>
       {/* list header */}
-      <div className='flex flex-row w-full h-fit justify-between  p-2 items-center mb-4 bg-stone-300 text-stone-600'>
+      <div className='flex flex-row w-full h-fit justify-between  rounded-[10px] p-2 items-center mb-4 bg-transparent bg-opacity-40 backdrop-blur-md bg-stone-300 text-white'>
         <div className='flex flex-row justify-center  items-center gap-2'>
           <h3 className={`flex w-fit shrink-0 font-medium`}>{title}</h3>
           <span className='flex font-semibold tracking-wide leading-normal ml-2'>{taskfilter.length}{' '}{' '}{taskfilter.length > 1 ? 'ISSUES' : 'ISSUE'}</span>
@@ -285,7 +287,10 @@ const Card = ({ tsk, start, tasks, setTask }: tprops) => {
           console.log('start')
           start(e, tsk)
         }}
-        className='flex w-full bg-white shadow-md hover:shadow-xl     h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-stone-300 border-[1px] '>
+        className={
+          // tsk.taskstate==COLUMN.PENDING?' bg-stone-500':tsk.taskstate==COLUMN.INPROGRESS?'bg-stone-300':'bg-white'
+          // 'bg-white'+
+        'flex w-full bg-white shadow-md hover:shadow-xl     h-fit gap-2 flex-col items-start justify-center p-3 cursor-grab active:cursor-grabbing rounded-md  border-stone-300 border-[1px] '}>
         {/* title  */}
         <span className='flex w-full text-start font-semibold text-wrap items-center '> {tsk.title}</span>
         {/* description */}
@@ -349,19 +354,19 @@ const Add = ({  settasks }: addprops) => {
               required={true}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Title"
-              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-black placeholder-black focus:outline-0"
+              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-white placeholder-white focus:outline-0"
             />
             <textarea
               onChange={(e) => setDesc(e.target.value)}
               required={false}
               autoFocus
               placeholder="Add new task..."
-              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-black placeholder-black focus:outline-0"
+              className="w-full rounded border border-violet-400 bg-violet-400/20 p-3 text-sm text-white placeholder-white focus:outline-0"
             />
             <div className="mt-1.5 flex items-center justify-end gap-1.5">
               <button
                 onClick={() => { setTitle(''); setDesc(''); setAdding(false) }}
-                className="px-3 py-1.5 text-xs text-stone-700 transition-colors hover:text-neutral-50"
+                className="px-3 py-1.5 text-xs text-slate-50 transition-colors hover:text-neutral-50"
               >
                 Close
               </button>
@@ -379,8 +384,8 @@ const Add = ({  settasks }: addprops) => {
           onClick={() => setAdding(true)}
           className="flex w-full items-center gap-1.5 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:text-neutral-50"
         >
-          <FiPlus className='text-black' />
-          <span className='text-black font-semibold tracking-widest'>Create Issue</span>
+          <FiPlus className='text-white' />
+          <span className='text-white font-semibold tracking-widest'>Create Issue</span>
         </motion.button>)
       }
 
